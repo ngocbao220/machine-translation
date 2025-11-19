@@ -1,6 +1,0 @@
-{"time":"2025-11-17T21:24:06.309097+07:00","level":"INFO","msg":"stream: starting","core version":"0.22.2"}
-{"time":"2025-11-17T21:24:06.961958+07:00","level":"INFO","msg":"stream: created new stream","id":"omka6pa1"}
-{"time":"2025-11-17T21:24:06.962016+07:00","level":"INFO","msg":"handler: started","stream_id":"omka6pa1"}
-{"time":"2025-11-17T21:24:06.962159+07:00","level":"INFO","msg":"stream: started","id":"omka6pa1"}
-{"time":"2025-11-17T21:24:06.962188+07:00","level":"INFO","msg":"writer: started","stream_id":"omka6pa1"}
-{"time":"2025-11-17T21:24:06.962227+07:00","level":"INFO","msg":"sender: started","stream_id":"omka6pa1"}
