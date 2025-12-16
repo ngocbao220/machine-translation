@@ -236,70 +236,72 @@ def get_args():
     parser.add_argument('--eos_idx', type=int, default=3)
 
     return parser.parse_args()
+
 def run_training(config):
+    """Hàm train nhận config từ bên ngoài"""
     print(f"🚀 Starting training with config: {config}")
 
     # 1. Setup Device
+    # Logic: Nếu user gõ --no_gpu thì config['gpu_mode'] sẽ là False
     use_cuda = config['gpu_mode'] and torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
     print(f"Running on: {device}")
     
-    # 2. Load Data & Tokenizer (INIT INSTANCE)
-    print("Initializing BPEDataManager...")
-    dm = BPEDataManager(
-        data_dir=config['data_dir'], 
-        src_lang=config['src_lang'],
-        tgt_lang=config['tgt_lang'], 
-        vocab_size=config['vocab_size']
-    )
-    
-    # Update vocab_size thực tế từ tokenizer
-    real_vocab_size = dm.tokenizer.get_vocab_size()
-    config['vocab_size'] = real_vocab_size
-    print(f"✅ Actual Vocab Size: {real_vocab_size}")
+    # 2. Load Data (Phần code thật của bạn)
+    dm = BPEDataManager(data_dir=config['data_dir'], src_lang=config['src_lang'],
+    tgt_lang=config['tgt_lang'], vocab_size=config['vocab_size'])
 
-    # Lấy DataLoader thật
-    train_loader = dm.get_dataloader(batch_size=config['batch_size'], shuffle=True)
+    # FIX BUGG
+    actual_vocab_size = dm.tokenizer.get_vocab_size()
+    print(f"⚠️ Actual Tokenizer Vocab Size: {actual_vocab_size} (Config requested: {config['vocab_size']})")
     
-    # Hack nhẹ để tạo val_loader từ train_loader (nếu bạn chưa tách file val riêng)
-    # Hoặc nếu BPEDataManager của bạn chưa có hàm tách val, hãy dùng tạm train_loader để test code
-    val_loader = train_loader 
-    
-    # 3. Init Model
-    model = TransformerTranslation(
-        src_vocab_size=config['vocab_size'], 
-        tgt_vocab_size=config['vocab_size'], 
-        d_model=512, 
-        pad_idx=dm.pad_id # Lấy từ instance dm
-    )
-    model.to(device)
+    # Cập nhật lại config và dùng số thực tế này để init model
+    config['vocab_size'] = actual_vocab_size
 
-    # 4. Optimizer & Loss
+    # train_ds, val_ds = dm.get_datasets(val_ratio=0.1)
+
+    # train_loader = DataLoader(
+    # train_ds,
+    # batch_size=config['batch_size'],
+    # shuffle=True,
+    # collate_fn=dm._collate_fn
+    # )
+
+    # val_loader = DataLoader(
+    # val_ds,
+    # batch_size=config['batch_size'],
+    # shuffle=False,
+    # collate_fn=dm._collate_fn
+    # )
+
+    # --- MOCK DATA LOADER ---
+    from unittest.mock import MagicMock
+    train_loader = [ (torch.randint(0,100,(4,10)), torch.randint(0,100,(4,10))) for _ in range(10) ]
+    val_loader = [ (torch.randint(0,100,(4,10)), torch.randint(0,100,(4,10))) for _ in range(2) ]
+    
+    model = TransformerTranslation(config['vocab_size'], config['vocab_size'], pad_idx=1)
+    vocab_mock = MagicMock()
+    vocab_mock.tokenizer.decode.return_value = "xin chào việt nam"
+    # ------------------------
+
+    # 3. Optimizer & Loss
     optimizer = optim.Adam(model.parameters(), lr=config['lr'], betas=(0.9, 0.98), eps=1e-9)
-    criterion = nn.CrossEntropyLoss(ignore_index=dm.pad_id, label_smoothing=0.1) 
+    criterion = nn.CrossEntropyLoss(ignore_index=1, label_smoothing=0.1) 
 
-    # 5. Init WandB
+    # 4. Init WandB
     if config['use_wandb']:
+        # Lưu ý: cần login wandb trước hoặc set biến môi trường
         wandb.init(project="transformer-translation", config=config)
+        # wandb.watch(model, log="all")
 
-    # 6. Init Trainer
-    # QUAN TRỌNG: Truyền biến 'dm' (đã init ở bước 2), KHÔNG truyền class BPEDataManager
-    trainer = Trainer(
-        model=model, 
-        vocab=dm,        # <--- CHÍNH XÁC LÀ Ở ĐÂY
-        optimizer=optimizer, 
-        criterion=criterion, 
-        device=device, 
-        config=config
-    )
+    # 5. Init Trainer
+    trainer = Trainer(model, dm, optimizer, criterion, device, config)
     
     best_loss = float('inf')
     
-    # 7. Training Loop
+    # 6. Training Loop
     for epoch in range(1, config['epochs'] + 1):
         train_loss = trainer.train_epoch(train_loader, epoch)
-        
-        # Validation
         val_loss, val_bleu = trainer.val_epoch(val_loader, epoch)
         
         print(f"Epoch {epoch} | Train Loss: {train_loss:.4f} | Val Loss: {val_loss:.4f} | BLEU: {val_bleu:.2f}")
