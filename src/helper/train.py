@@ -210,8 +210,8 @@ def get_args():
     parser = argparse.ArgumentParser(description="Train Transformer Translation Model")
 
     # --- Path Arguments ---
-    parser.add_argument('--data_dir', type=str, default='../data/processed/ALT', help='Đường dẫn data')
-    parser.add_argument('--base_checkpoint_dir', type=str, default='../checkpoints', help='Thư mục gốc lưu model')
+    parser.add_argument('--data_dir', type=str, default='./data/processed/ALT', help='Đường dẫn data')
+    parser.add_argument('--base_checkpoint_dir', type=str, default='./checkpoints', help='Thư mục gốc lưu model')
 
     # --- Meta Data ---
     parser.add_argument('--model_name', type=str, default='base_transformer', help='Tên mô hình')
