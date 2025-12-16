@@ -16,7 +16,7 @@ EOS_IDX=3
 
 USE_WANDB="--use_wandb" 
 TIMESTAMP="--add_timestamp"
-NO_GPU="--no_gpu" 
+# NO_GPU="--no_gpu" 
 
 echo "🚀 Bắt đầu huấn luyện mô hình Dịch máy..."
 echo "Src: $SRC_LANG | Tgt: $TGT_LANG"

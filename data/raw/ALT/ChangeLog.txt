@@ -1,0 +1,8 @@
+
+#
+# 20191206
+#
+
+* Modify data_ja.txt
+* Modify data_bg.txt
+* Add data_hi.txt 
