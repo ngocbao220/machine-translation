@@ -229,6 +229,8 @@ def get_args():
     # Mặc định là False, nếu thêm flag vào câu lệnh thì thành True
     parser.add_argument('--no_gpu', action='store_true', help='Tắt GPU (ép dùng CPU)')
     parser.add_argument('--use_wandb', action='store_true', help='Sử dụng WandB để log')
+    # --- MỚI THÊM: WandB API Key ---
+    parser.add_argument('--wandb_api_key', type=str, default=None, help='WandB API Key để login tự động')
 
     # --- Model/Vocab ---
     parser.add_argument('--vocab_size', type=int, default=10000, help='Kích thước bộ từ điển')
@@ -290,9 +292,12 @@ def run_training(config):
 
     # 4. Init WandB
     if config['use_wandb']:
-        # Lưu ý: cần login wandb trước hoặc set biến môi trường
+        # --- MỚI THÊM: Logic Login ---
+        if config.get('wandb_api_key'):
+            print("🔑 Found WandB API Key. Logging in...")
+            wandb.login(key=config['wandb_api_key'])
+        
         wandb.init(project="transformer-translation", config=config)
-        # wandb.watch(model, log="all")
 
     # 5. Init Trainer
     trainer = Trainer(model, dm, optimizer, criterion, device, config)
