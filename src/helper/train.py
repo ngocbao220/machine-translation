@@ -295,7 +295,7 @@ def run_training(config):
         # wandb.watch(model, log="all")
 
     # 5. Init Trainer
-    trainer = Trainer(model, BPEDataManager, optimizer, criterion, device, config)
+    trainer = Trainer(model, dm, optimizer, criterion, device, config)
     
     best_loss = float('inf')
     
