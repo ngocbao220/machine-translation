@@ -258,30 +258,30 @@ def run_training(config):
     # Cập nhật lại config và dùng số thực tế này để init model
     config['vocab_size'] = actual_vocab_size
 
-    # train_ds, val_ds = dm.get_datasets(val_ratio=0.1)
+    train_ds, val_ds = dm.get_datasets(val_ratio=0.1)
 
-    # train_loader = DataLoader(
-    # train_ds,
-    # batch_size=config['batch_size'],
-    # shuffle=True,
-    # collate_fn=dm._collate_fn
-    # )
+    train_loader = DataLoader(
+    train_ds,
+    batch_size=config['batch_size'],
+    shuffle=True,
+    collate_fn=dm._collate_fn
+    )
 
-    # val_loader = DataLoader(
-    # val_ds,
-    # batch_size=config['batch_size'],
-    # shuffle=False,
-    # collate_fn=dm._collate_fn
-    # )
+    val_loader = DataLoader(
+    val_ds,
+    batch_size=config['batch_size'],
+    shuffle=False,
+    collate_fn=dm._collate_fn
+    )
 
     # --- MOCK DATA LOADER ---
-    from unittest.mock import MagicMock
-    train_loader = [ (torch.randint(0,100,(4,10)), torch.randint(0,100,(4,10))) for _ in range(10) ]
-    val_loader = [ (torch.randint(0,100,(4,10)), torch.randint(0,100,(4,10))) for _ in range(2) ]
+    # from unittest.mock import MagicMock
+    # train_loader = [ (torch.randint(0,100,(4,10)), torch.randint(0,100,(4,10))) for _ in range(10) ]
+    # val_loader = [ (torch.randint(0,100,(4,10)), torch.randint(0,100,(4,10))) for _ in range(2) ]
     
     model = TransformerTranslation(config['vocab_size'], config['vocab_size'], pad_idx=1)
-    vocab_mock = MagicMock()
-    vocab_mock.tokenizer.decode.return_value = "xin chào việt nam"
+    # vocab_mock = MagicMock()
+    # vocab_mock.tokenizer.decode.return_value = "xin chào việt nam"
     # ------------------------
 
     # 3. Optimizer & Loss
