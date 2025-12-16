@@ -231,6 +231,7 @@ def get_args():
     parser.add_argument('--use_wandb', action='store_true', help='Sử dụng WandB để log')
     # --- MỚI THÊM: WandB API Key ---
     parser.add_argument('--wandb_api_key', type=str, default=None, help='WandB API Key để login tự động')
+    parser.add_argument('--wandb_project', type=str, default="transformer_base", help='WandB API Key để login tự động')
 
     # --- Model/Vocab ---
     parser.add_argument('--vocab_size', type=int, default=10000, help='Kích thước bộ từ điển')
@@ -297,7 +298,7 @@ def run_training(config):
             print("🔑 Found WandB API Key. Logging in...")
             wandb.login(key=config['wandb_api_key'])
         
-        wandb.init(project="transformer-translation", config=config)
+        wandb.init(project=config['wandb_project'], config=config)
 
     # 5. Init Trainer
     trainer = Trainer(model, dm, optimizer, criterion, device, config)
