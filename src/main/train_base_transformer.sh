@@ -1,6 +1,6 @@
 
-DATA_DIR="../data/processed/IWSLT15"
-CHECKPOINT_DIR="../checkpoints"
+DATA_DIR="/kaggle/input/iwslt25"
+CHECKPOINT_DIR="./checkpoint"
 MODEL_NAME="transformer_base"
 DATASET_NAME="IWSLT15"
 SRC_LANG="en"
