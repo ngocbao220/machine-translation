@@ -135,28 +135,107 @@ class Trainer:
                     break
                     
         return ys[0]
+
+    def batch_greedy_decode(self, src, max_len=50):
+        """
+        Phiên bản tối ưu: Decode song song cả batch thay vì từng câu lẻ tẻ.
+        src: (Batch_Size, Seq_Len)
+        Trả về: (Batch_Size, Max_Len_Extra) chứa Token IDs
+        """
+        # Model core handling (compile/dataparallel)
+        model_core = self.model
+        if isinstance(model_core, (nn.DataParallel, torch.nn.parallel.DistributedDataParallel)):
+            model_core = model_core.module
+        if hasattr(model_core, "_orig_mod"):
+             model_core = model_core._orig_mod
+             
+        model_core.eval()
+        
+        # Setup Constants
+        batch_size = src.size(0)
+        bos_idx = self.config['bos_idx']
+        eos_idx = self.config['eos_idx']
+        
+        # 1. Encode (Chạy 1 lần cho cả Batch)
+        # src_mask: (Batch, 1, 1, Src_Len) hoặc (Batch, Src_Len) tùy implement
+        # Ở đây ta dùng simple padding mask
+        src_mask = (src != self.config['pad_idx']).unsqueeze(1).unsqueeze(2) # Ví dụ shape mask
+        # Hoặc dùng hàm create_mask của model nếu có
+        # Lưu ý: Nếu model dùng nn.Transformer chuẩn của PyTorch, mask xử lý hơi khác
+        
+        # Tạm thời dùng cách encode chuẩn của nn.Transformer:
+        src_emb = model_core.positional_encoding(model_core.src_embedding(src) * math.sqrt(model_core.d_model))
+        memory = model_core.transformer.encoder(src_emb) # (Batch, Seq, Dim)
+        
+        # 2. Decode Loop
+        # Khởi tạo input decoder: Cột đầu tiên toàn là <bos>
+        ys = torch.fill_(torch.empty(batch_size, 1), bos_idx).type(torch.long).to(self.device)
+        
+        # Biến để theo dõi câu nào đã xong (gặp <eos>)
+        finished = torch.zeros(batch_size, dtype=torch.bool).to(self.device)
+        
+        for i in range(max_len - 1):
+            # Tạo mask che tương lai (Causal Mask)
+            tgt_mask = model_core.generate_square_subsequent_mask(ys.size(1), self.device)
+            
+            # Embed & Pos Encode
+            tgt_emb = model_core.positional_encoding(model_core.tgt_embedding(ys) * math.sqrt(model_core.d_model))
+            
+            # Decoder Forward
+            out = model_core.transformer.decoder(tgt_emb, memory, tgt_mask=tgt_mask)
+            
+            # Projection -> Vocab (Chỉ lấy token cuối cùng)
+            prob = model_core.fc_out(out[:, -1]) 
+            _, next_word = torch.max(prob, dim=1) # (Batch_Size,)
+            
+            # Nếu câu đã finish trước đó, giữ nguyên token là <pad> hoặc <eos> để không ảnh hưởng
+            # Nhưng để đơn giản, cứ nối tiếp vào, sau này decode text ta sẽ cắt tại <eos> đầu tiên
+            
+            ys = torch.cat([ys, next_word.unsqueeze(1)], dim=1)
+            
+            # Kiểm tra xem cả batch đã xong hết chưa để break sớm
+            current_eos = (next_word == eos_idx)
+            finished = finished | current_eos
+            if finished.all():
+                break
+                
+        return ys
     
-    def compute_bleu_sacrebleu(self, dataloader, max_samples=200, max_len_extra=5):
+    def compute_bleu_sacrebleu(self, dataloader, max_samples=500, max_len_extra=10):
         self.model.eval()
         preds = []
         refs = []
         collected = 0
 
         with torch.no_grad():
-            for src, tgt in tqdm(dataloader, desc="Calculating BLEU", leave=False):
-                src, tgt = src.to(self.device), tgt.to(self.device)
-                bsz = src.size(0)
-
-                for i in range(bsz):
+            for batch in tqdm(dataloader, desc="Batch Decoding BLEU", leave=False):
+                src, tgt = batch
+                src = src.to(self.device)
+                # Không cần tgt inputs, chỉ cần text refs để so sánh
+                
+                # --- GỌI HÀM BATCH DECODE ---
+                # Chạy song song cả batch (ví dụ 128 câu 1 lúc)
+                batch_pred_ids = self.batch_greedy_decode(src, max_len=tgt.size(1) + max_len_extra)
+                
+                # Convert IDs to Text (CPU work)
+                for i in range(src.size(0)):
                     if collected >= max_samples: break
-
-                    pred_ids = self.greedy_decode(src[i], max_len=tgt.size(1) + max_len_extra)
-                    pred_str = self.vocab.tokenizer.decode(pred_ids.tolist(), skip_special_tokens=True)
+                    
+                    # Cắt chuỗi tại EOS đầu tiên
+                    pred_row = batch_pred_ids[i].tolist()
+                    try:
+                        eos_pos = pred_row.index(self.config['eos_idx'])
+                        pred_row = pred_row[:eos_pos]
+                    except ValueError:
+                        pass # Không tìm thấy eos thì lấy hết
+                    
+                    pred_str = self.vocab.tokenizer.decode(pred_row, skip_special_tokens=True)
                     tgt_str = self.vocab.tokenizer.decode(tgt[i].tolist(), skip_special_tokens=True)
-
+                    
                     preds.append(pred_str)
                     refs.append(tgt_str)
                     collected += 1
+                
                 if collected >= max_samples: break
 
         if not preds: return 0.0

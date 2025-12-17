@@ -1,4 +1,5 @@
 sacrebleu
+tokenizers
 wandb
 torch
 torchvision
