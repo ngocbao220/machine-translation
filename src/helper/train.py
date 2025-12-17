@@ -137,7 +137,7 @@ class Trainer:
         collected = 0
 
         with torch.no_grad():
-            for src, tgt in dataloader:
+            for src, tgt in tqdm(dataloader):
                 src, tgt = src.to(self.device), tgt.to(self.device)
                 bsz = src.size(0)
 
@@ -177,11 +177,6 @@ class Trainer:
     def val_epoch(self, dataloader, epoch):
         self.model.eval()
         total_loss = 0
-        preds_text = []
-        targets_text = []
-        
-        # Chỉ lấy 1 subset để tính BLEU cho nhanh nếu data quá lớn
-        # Ở đây tôi tính loss trên toàn bộ, nhưng BLEU có thể sample
         
         with torch.no_grad():
             for i, batch in enumerate(tqdm(dataloader, desc=f"Val Epoch {epoch}")):
@@ -322,7 +317,17 @@ def run_training(config):
     # train_loader = [ (torch.randint(0,100,(4,10)), torch.randint(0,100,(4,10))) for _ in range(10) ]
     # val_loader = [ (torch.randint(0,100,(4,10)), torch.randint(0,100,(4,10))) for _ in range(2) ]
     
-    model = TransformerTranslation(config['vocab_size'], config['vocab_size'], pad_idx=1)
+    model = TransformerTranslation(
+        src_vocab_size=config['vocab_size'], 
+        tgt_vocab_size=config['vocab_size'], 
+        d_model=256,        # Giảm từ 512
+        nhead=4,            # Giảm từ 8
+        num_encoder_layers=3, # Giảm từ 6
+        num_decoder_layers=3, # Giảm từ 6
+        dim_feedforward=1024, # Giảm từ 2048
+        dropout=0.3,          # Tăng dropout
+        pad_idx=dm.pad_id
+    )
     # vocab_mock = MagicMock()
     # vocab_mock.tokenizer.decode.return_value = "xin chào việt nam"
     # ------------------------
