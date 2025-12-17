@@ -1,9 +1,0 @@
-/Users/ngocbao/Documents/Document/Season5/NLP/code/Machine Translation/src/helper/train.py:45: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
-  self.scaler = torch.cuda.amp.GradScaler(enabled=(self.mixed_precision_dtype == torch.float16 and self.use_amp))
-/opt/anaconda3/envs/nlp/lib/python3.12/site-packages/torch/amp/grad_scaler.py:136: UserWarning: torch.cuda.amp.GradScaler is enabled, but CUDA is not available.  Disabling.
-  warnings.warn(
-⚡ AMP Enabled: True | Type: torch.float16
-Train Epoch 1:   0%|                                                                                                        | 0/142 [00:00<?, ?it/s]/opt/anaconda3/envs/nlp/lib/python3.12/site-packages/torch/utils/data/dataloader.py:684: UserWarning: 'pin_memory' argument is set as true but not supported on MPS now, then device pinned memory won't be used.
-  warnings.warn(warn_msg)
-/opt/anaconda3/envs/nlp/lib/python3.12/site-packages/torch/amp/autocast_mode.py:266: UserWarning: User provided device_type of 'cuda', but CUDA is not available. Disabling
-  warnings.warn(

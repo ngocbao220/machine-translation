@@ -2,4 +2,7 @@ sacrebleu
 tokenizers
 wandb
 torch
+torchaudio
 torchvision
+tqdm 
+pyyaml

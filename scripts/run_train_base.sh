@@ -1,0 +1,1 @@
+python train.py --config configs/base_alt.yaml
