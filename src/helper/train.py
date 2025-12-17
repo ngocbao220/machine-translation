@@ -12,11 +12,9 @@ import argparse
 
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-try:
-    from model.base_transformer import TransformerTranslation
-    from data.loader import BPEDataManager
-except ImportError:
-    pass
+from model.base_transformer import TransformerTranslation
+from data.loader import BPEDataManager
+
 
 # --- TỐI ƯU 1: Bật TF32 cho RTX 3000/4000 series ---
 torch.set_float32_matmul_precision('high')
