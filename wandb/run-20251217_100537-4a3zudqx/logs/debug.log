@@ -1,0 +1,21 @@
+2025-12-17 10:05:37,760 INFO    MainThread:1373 [wandb_setup.py:_flush():81] Current SDK version is 0.22.2
+2025-12-17 10:05:37,761 INFO    MainThread:1373 [wandb_setup.py:_flush():81] Configure stats pid to 1373
+2025-12-17 10:05:37,761 INFO    MainThread:1373 [wandb_setup.py:_flush():81] Loading settings from /Users/ngocbao/.config/wandb/settings
+2025-12-17 10:05:37,761 INFO    MainThread:1373 [wandb_setup.py:_flush():81] Loading settings from /Users/ngocbao/Documents/Document/Season5/NLP/code/Machine Translation/wandb/settings
+2025-12-17 10:05:37,761 INFO    MainThread:1373 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2025-12-17 10:05:37,761 INFO    MainThread:1373 [wandb_init.py:setup_run_log_directory():705] Logging user logs to /Users/ngocbao/Documents/Document/Season5/NLP/code/Machine Translation/wandb/run-20251217_100537-4a3zudqx/logs/debug.log
+2025-12-17 10:05:37,761 INFO    MainThread:1373 [wandb_init.py:setup_run_log_directory():706] Logging internal logs to /Users/ngocbao/Documents/Document/Season5/NLP/code/Machine Translation/wandb/run-20251217_100537-4a3zudqx/logs/debug-internal.log
+2025-12-17 10:05:37,761 INFO    MainThread:1373 [wandb_init.py:init():832] calling init triggers
+2025-12-17 10:05:37,761 INFO    MainThread:1373 [wandb_init.py:init():837] wandb.init called with sweep_config: {}
+config: {'data_dir': './data/processed/ALT', 'base_checkpoint_dir': './checkpoints', 'model_name': 'transformer_base', 'dataset_name': 'ALT', 'src_lang': 'en', 'tgt_lang': 'vi', 'add_timestamp': True, 'batch_size': 32, 'lr': 0.0001, 'epochs': 20, 'no_gpu': False, 'use_wandb': True, 'wandb_api_key': '4379f72f74531ca44486a34cb4e859dc0e3cf103', 'wandb_project': 'transformer_base', 'vocab_size': 10000, 'bos_idx': 2, 'eos_idx': 3, 'gpu_mode': True, 'save_dir': './checkpoints/transformer_base/ALT/en_vi/20251217_100536', '_wandb': {}}
+2025-12-17 10:05:37,761 INFO    MainThread:1373 [wandb_init.py:init():880] starting backend
+2025-12-17 10:05:37,983 INFO    MainThread:1373 [wandb_init.py:init():883] sending inform_init request
+2025-12-17 10:05:38,018 INFO    MainThread:1373 [wandb_init.py:init():891] backend started and connected
+2025-12-17 10:05:38,021 INFO    MainThread:1373 [wandb_init.py:init():961] updated telemetry
+2025-12-17 10:05:38,045 INFO    MainThread:1373 [wandb_init.py:init():985] communicating run to backend with 90.0 second timeout
+2025-12-17 10:05:38,878 INFO    MainThread:1373 [wandb_init.py:init():1036] starting run threads in backend
+2025-12-17 10:05:39,028 INFO    MainThread:1373 [wandb_run.py:_console_start():2509] atexit reg
+2025-12-17 10:05:39,028 INFO    MainThread:1373 [wandb_run.py:_redirect():2357] redirect: wrap_raw
+2025-12-17 10:05:39,028 INFO    MainThread:1373 [wandb_run.py:_redirect():2426] Wrapping output streams.
+2025-12-17 10:05:39,029 INFO    MainThread:1373 [wandb_run.py:_redirect():2449] Redirects installed.
+2025-12-17 10:05:39,030 INFO    MainThread:1373 [wandb_init.py:init():1076] run started, returning control to user process

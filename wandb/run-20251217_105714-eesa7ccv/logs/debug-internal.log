@@ -1,0 +1,6 @@
+{"time":"2025-12-17T10:57:14.98796+07:00","level":"INFO","msg":"stream: starting","core version":"0.22.2"}
+{"time":"2025-12-17T10:57:15.43791+07:00","level":"INFO","msg":"stream: created new stream","id":"eesa7ccv"}
+{"time":"2025-12-17T10:57:15.438117+07:00","level":"INFO","msg":"handler: started","stream_id":"eesa7ccv"}
+{"time":"2025-12-17T10:57:15.438261+07:00","level":"INFO","msg":"stream: started","id":"eesa7ccv"}
+{"time":"2025-12-17T10:57:15.438268+07:00","level":"INFO","msg":"writer: started","stream_id":"eesa7ccv"}
+{"time":"2025-12-17T10:57:15.438452+07:00","level":"INFO","msg":"sender: started","stream_id":"eesa7ccv"}
