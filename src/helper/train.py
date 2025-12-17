@@ -145,7 +145,7 @@ class Trainer:
                 # --- TÍNH BLEU (SAMPLE) ---
                 # Tính BLEU tốn thời gian vì phải chạy greedy decode từng câu
                 # Chỉ tính trên 5 batch đầu tiên mỗi epoch để theo dõi tiến độ
-                if i < 5: 
+                if i: 
                     # Decode câu đầu tiên trong batch
                     pred_indices = self.greedy_decode(src[0], max_len=tgt.shape[1] + 5)
                     

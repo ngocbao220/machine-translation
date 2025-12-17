@@ -1,0 +1,67 @@
+{
+  "os":  "macOS-15.7.1-arm64-arm-64bit",
+  "python":  "CPython 3.12.11",
+  "startedAt":  "2025-12-17T01:39:16.917086Z",
+  "args":  [
+    "--data_dir",
+    "./data/processed/ALT",
+    "--base_checkpoint_dir",
+    "./checkpoints",
+    "--model_name",
+    "transformer_base",
+    "--dataset_name",
+    "ALT",
+    "--src_lang",
+    "en",
+    "--tgt_lang",
+    "vi",
+    "--batch_size",
+    "2",
+    "--lr",
+    "0.0001",
+    "--epochs",
+    "20",
+    "--vocab_size",
+    "10000",
+    "--bos_idx",
+    "2",
+    "--eos_idx",
+    "3",
+    "--add_timestamp",
+    "--wandb_api_key",
+    "4379f72f74531ca44486a34cb4e859dc0e3cf103",
+    "--use_wandb"
+  ],
+  "program":  "/Users/ngocbao/Documents/Document/Season5/NLP/code/Machine Translation/src/helper/train.py",
+  "codePath":  "src/helper/train.py",
+  "codePathLocal":  "src/helper/train.py",
+  "git":  {
+    "remote":  "https://github.com/ngocbao220/NLP_MT.git",
+    "commit":  "2fb5c3afd6d6a6330cb6fa2dca41c52649602bda"
+  },
+  "email":  "ngocbaotrinhtuan@gmail.com",
+  "root":  "/Users/ngocbao/Documents/Document/Season5/NLP/code/Machine Translation",
+  "host":  "MacBook-Pro-4.local",
+  "executable":  "/opt/anaconda3/envs/nlp/bin/python",
+  "cpu_count":  10,
+  "cpu_count_logical":  10,
+  "disk":  {
+    "/":  {
+      "total":  "994662584320",
+      "used":  "771609485312"
+    }
+  },
+  "memory":  {
+    "total":  "34359738368"
+  },
+  "apple":  {
+    "name":  "Apple M1 Pro",
+    "ecpuCores":  2,
+    "pcpuCores":  8,
+    "gpuCores":  16,
+    "memoryGb":  32,
+    "swapTotalBytes":  "16106127360",
+    "ramTotalBytes":  "34359738368"
+  },
+  "writerId":  "u5fwwyck2atpl3z15rmfp04b4x59vefb"
+}
