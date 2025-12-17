@@ -1,4 +1,4 @@
-torchmetrics
+sacrebleu
 wandb
 torch
 torchvision
