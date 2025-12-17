@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 from tqdm import tqdm
 import wandb
-from torchmetrics.text import BLEUScore
+import sacrebleu
 from torch.utils.data import DataLoader
 from datetime import datetime
 import math
@@ -24,7 +24,6 @@ class Trainer:
         self.scheduler = scheduler
         self.device = device
         self.config = config
-        self.bleu_metric = BLEUScore()
         
         # Setup Multi-GPU
         if self.config['gpu_mode'] and torch.cuda.device_count() > 1:
@@ -120,6 +119,60 @@ class Trainer:
                 break
                 
         return ys[0]
+    
+    def compute_bleu_sacrebleu(
+        self,
+        dataloader,
+        max_samples=200,
+        max_len_extra=5
+    ):
+        """
+        Compute BLEU score using sacreBLEU (standard MT evaluation)
+        """
+
+        self.model.eval()
+        preds = []
+        refs = []
+
+        collected = 0
+
+        with torch.no_grad():
+            for src, tgt in dataloader:
+                src, tgt = src.to(self.device), tgt.to(self.device)
+                bsz = src.size(0)
+
+                for i in range(bsz):
+                    if collected >= max_samples:
+                        break
+
+                    pred_ids = self.greedy_decode(
+                        src[i],
+                        max_len=tgt.size(1) + max_len_extra
+                    )
+
+                    pred_str = self.vocab.tokenizer.decode(
+                        pred_ids.tolist(),
+                        skip_special_tokens=True
+                    )
+
+                    tgt_str = self.vocab.tokenizer.decode(
+                        tgt[i].tolist(),
+                        skip_special_tokens=True
+                    )
+
+                    preds.append(pred_str)
+                    refs.append(tgt_str)
+                    collected += 1
+
+                if collected >= max_samples:
+                    break
+
+        if not preds:
+            return 0.0
+
+        bleu = sacrebleu.corpus_bleu(preds, [refs])
+        return bleu.score
+
 
     def val_epoch(self, dataloader, epoch):
         self.model.eval()
@@ -142,38 +195,13 @@ class Trainer:
                 loss = self.criterion(output.reshape(-1, output.shape[-1]), tgt_output.reshape(-1))
                 total_loss += loss.item()
 
-                # --- TÍNH BLEU (SAMPLE) ---
-                # Tính BLEU tốn thời gian vì phải chạy greedy decode từng câu
-                # Chỉ tính trên 5 batch đầu tiên mỗi epoch để theo dõi tiến độ
-                if i: 
-                    # Decode câu đầu tiên trong batch
-                    pred_indices = self.greedy_decode(src[0], max_len=tgt.shape[1] + 5)
-                    
-                    # Convert IDs -> Text
-                    # self.vocab.tokenizer là instance của Tokenizer library
-                    pred_str = self.vocab.tokenizer.decode(pred_indices.tolist(), skip_special_tokens=True)
-                    target_str = self.vocab.tokenizer.decode(tgt[0].tolist(), skip_special_tokens=True)
-                    
-                    print(f"\n--- DEBUG STEP {i} ---")
-                    print(f"Src IDs : {src[0][:10].tolist()}...") # Xem input vào có đúng ko
-                    print(f"Pred IDs: {pred_indices.tolist()}")    # Xem model nhả ra ID gì
-                    print(f"Pred Str: '{pred_str}'")               # Xem text
-                    print(f"Real Str: '{target_str}'")             # Xem nhãn
-
-                    preds_text.append(pred_str)
-                    targets_text.append([target_str]) # BLEU cần list of references
-
         avg_loss = total_loss / len(dataloader)
-        
-        # Compute BLEU
-        bleu = 0
-        if preds_text:
-            bleu = self.bleu_metric(preds_text, targets_text).item()
-            
-            # Print sample visualization
-            print(f"\nExample Val Pred: {preds_text[0]}")
-            print(f"Example Val Real: {targets_text[0][0]}")
-            
+
+        bleu = self.compute_bleu_sacrebleu(
+            dataloader=dataloader,
+            max_samples=200
+        )
+
         return avg_loss, bleu
 
     def save_checkpoint(self, epoch, val_loss, is_best=False):
