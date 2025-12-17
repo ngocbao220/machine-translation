@@ -36,6 +36,10 @@ class Trainer:
 
     def train_epoch(self, dataloader, epoch):
         self.model.train()
+        # Unwrap DataParallel/DistributedDataParallel to access the underlying module
+        model_core = self.model
+        if isinstance(model_core, (nn.DataParallel, nn.parallel.DistributedDataParallel)):
+            model_core = model_core.module
         total_loss = 0
         pbar = tqdm(dataloader, desc=f"Train Epoch {epoch}")
         
@@ -50,19 +54,19 @@ class Trainer:
 
             # Mixed Precision Context
             with torch.amp.autocast(device_type='cuda', dtype=self.mixed_precision_dtype, enabled=self.use_amp):
-                output = self.model(src, tgt_input) 
+                output = model_core(src, tgt_input)
                 loss = self.criterion(output.reshape(-1, output.shape[-1]), tgt_output.reshape(-1))
             
             # Backward logic (BF16 vs FP16)
             if self.use_amp and self.mixed_precision_dtype == torch.float16:
                 self.scaler.scale(loss).backward()
                 self.scaler.unscale_(self.optimizer)
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+                torch.nn.utils.clip_grad_norm_(model_core.parameters(), max_norm=1.0)
                 self.scaler.step(self.optimizer)
                 self.scaler.update()
             else:
                 loss.backward()
-                torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+                torch.nn.utils.clip_grad_norm_(model_core.parameters(), max_norm=1.0)
                 self.optimizer.step()
             
             self.scheduler.step()
@@ -139,6 +143,11 @@ class Trainer:
 
     def val_epoch(self, dataloader, epoch, run_bleu=False):
         self.model.eval()
+        # Unwrap parallel wrapper to access core model for forward/state
+        model_core = self.model
+        if isinstance(model_core, (nn.DataParallel, nn.parallel.DistributedDataParallel)):
+            model_core = model_core.module
+        model_core.eval()
         total_loss = 0
         with torch.no_grad():
             for batch in tqdm(dataloader, desc=f"Val Epoch {epoch}"):
@@ -147,7 +156,7 @@ class Trainer:
                 tgt_input, tgt_output = tgt[:, :-1], tgt[:, 1:]
                 
                 with torch.amp.autocast(device_type='cuda', dtype=self.mixed_precision_dtype, enabled=self.use_amp):
-                    output = self.model(src, tgt_input)
+                    output = model_core(src, tgt_input)
                     loss = self.criterion(output.reshape(-1, output.shape[-1]), tgt_output.reshape(-1))
                 total_loss += loss.item()
 
@@ -163,9 +172,12 @@ class Trainer:
         os.makedirs(save_dir, exist_ok=True)
         # Handle logic unwrap model (compile/parallel) here...
         # (Giữ nguyên logic cũ của bạn)
+        model_to_save = self.model
+        if isinstance(model_to_save, (nn.DataParallel, nn.parallel.DistributedDataParallel)):
+            model_to_save = model_to_save.module
         state = {
             'epoch': epoch,
-            'state_dict': self.model.state_dict(), # Cần unwrap nếu dùng DDP
+            'state_dict': model_to_save.state_dict(),
             'val_loss': val_loss
         }
         torch.save(state, os.path.join(save_dir, f"checkpoint_{epoch}.pth"))

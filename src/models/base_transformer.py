@@ -45,7 +45,7 @@ class TransformerTranslation(nn.Module):
         self.src_embedding = nn.Embedding(src_vocab_size, d_model)
         self.tgt_embedding = nn.Embedding(tgt_vocab_size, d_model)
         
-        # 2. Positional Encoding (ĐÂY LÀ DÒNG BẠN ĐANG BỊ THIẾU HOẶC SAI TÊN)
+        # 2. Positional Encoding 
         self.positional_encoding = PositionalEncoding(d_model, dropout=dropout)
         
         # 3. Transformer Core
