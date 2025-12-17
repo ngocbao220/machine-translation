@@ -19,8 +19,10 @@ train:
   gpu_mode: true
   use_amp: true      # Mixed Precision
   save_dir: ".outputs/checkpoints/base_alt"
+  use_wandb: true
+  project_name: "base_alt"
+  wandb_api_key: "4379f72f74531ca44486a34cb4e859dc0e3cf103"
 
 logging:
-  use_wandb: true
   project_name: "base_alt"
   wandb_api_key: "4379f72f74531ca44486a34cb4e859dc0e3cf103"
