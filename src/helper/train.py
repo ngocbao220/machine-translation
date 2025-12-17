@@ -16,11 +16,12 @@ from model.base_transformer import TransformerTranslation
 from data.loader import BPEDataManager
 
 class Trainer:
-    def __init__(self, model, vocab, optimizer, criterion, device, config):
+    def __init__(self, model, vocab, optimizer, criterion, scheduler, device, config):
         self.model = model
         self.vocab = vocab # Object chứa tokenizer (để decode tính BLEU)
         self.optimizer = optimizer
         self.criterion = criterion
+        self.scheduler = scheduler
         self.device = device
         self.config = config
         self.bleu_metric = BLEUScore()
@@ -67,6 +68,7 @@ class Trainer:
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
             
             self.optimizer.step()
+            self.scheduler.step()
             
             total_loss += loss.item()
             pbar.set_postfix({'loss': loss.item()})
@@ -152,6 +154,12 @@ class Trainer:
                     pred_str = self.vocab.tokenizer.decode(pred_indices.tolist(), skip_special_tokens=True)
                     target_str = self.vocab.tokenizer.decode(tgt[0].tolist(), skip_special_tokens=True)
                     
+                    print(f"\n--- DEBUG STEP {i} ---")
+                    print(f"Src IDs : {src[0][:10].tolist()}...") # Xem input vào có đúng ko
+                    print(f"Pred IDs: {pred_indices.tolist()}")    # Xem model nhả ra ID gì
+                    print(f"Pred Str: '{pred_str}'")               # Xem text
+                    print(f"Real Str: '{target_str}'")             # Xem nhãn
+
                     preds_text.append(pred_str)
                     targets_text.append([target_str]) # BLEU cần list of references
 
@@ -252,7 +260,11 @@ def run_training(config):
     
     # 2. Load Data (Phần code thật của bạn)
     dm = BPEDataManager(data_dir=config['data_dir'], src_lang=config['src_lang'],
-    tgt_lang=config['tgt_lang'], vocab_size=config['vocab_size'])
+                        tgt_lang=config['tgt_lang'], vocab_size=config['vocab_size'])
+    
+    print(f"BOS ID: {dm.tokenizer.token_to_id('<bos>')}")
+    print(f"EOS ID: {dm.tokenizer.token_to_id('<eos>')}")
+    print(f"PAD ID: {dm.tokenizer.token_to_id('<pad>')}")
 
     # FIX BUGG
     actual_vocab_size = dm.tokenizer.get_vocab_size()
@@ -288,8 +300,16 @@ def run_training(config):
     # ------------------------
 
     # 3. Optimizer & Loss
-    optimizer = optim.Adam(model.parameters(), lr=config['lr'], betas=(0.9, 0.98), eps=1e-9)
+    optimizer = optim.Adam(model.parameters(), lr=0.0005, betas=(0.9, 0.98), eps=1e-9)
     criterion = nn.CrossEntropyLoss(ignore_index=1, label_smoothing=0.1) 
+
+    scheduler = torch.optim.lr_scheduler.OneCycleLR(
+        optimizer, 
+        max_lr=0.0005, 
+        steps_per_epoch=len(train_loader), 
+        epochs=config['epochs'],
+        pct_start=0.1  # 10% thời gian đầu dùng để warmup
+    )
 
     # 4. Init WandB
     if config['use_wandb']:
@@ -301,7 +321,7 @@ def run_training(config):
         wandb.init(project=config['wandb_project'], config=config)
 
     # 5. Init Trainer
-    trainer = Trainer(model, dm, optimizer, criterion, device, config)
+    trainer = Trainer(model, dm, optimizer, criterion, scheduler, device, config)
     
     best_loss = float('inf')
     
