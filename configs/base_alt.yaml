@@ -6,7 +6,7 @@ data:
 
 model:
   model_type: "base"       # Đổi thành "re" để dùng ReTransformer
-  d_model: 256
+  d_model: 512
   nhead: 4
   num_layers: 4
   dim_feedforward: 1024
