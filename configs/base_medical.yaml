@@ -1,6 +1,6 @@
 data:
   dataset_name: "Medical"
-  src_lang: "zh"
+  src_lang: "en"
   tgt_lang: "vi"
   vocab_size: 10000
 
