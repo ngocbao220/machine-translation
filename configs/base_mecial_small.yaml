@@ -1,0 +1,27 @@
+data:
+  dataset_name: "IWSLT15"
+  src_lang: "en"
+  tgt_lang: "vi"
+  vocab_size: 10000
+
+model:
+  model_type: "base"       # Đổi thành "re" để dùng ReTransformer
+  d_model: 512
+  nhead: 8
+  num_layers: 6
+  dim_feedforward: 2048
+  dropout: 0.2
+
+train:
+  batch_size: 64
+  lr: 0.0005
+  epochs: 30
+  gpu_mode: true
+  use_amp: true      # Mixed Precision
+  save_dir: ".outputs/checkpoints/base_iwslt_medium"
+  use_wandb: true
+
+logging:
+  use_wandb: true
+  project_name: "base_iwslt_medium"
+  wandb_api_key: "4379f72f74531ca44486a34cb4e859dc0e3cf103"
