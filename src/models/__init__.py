@@ -1,11 +1,11 @@
 # src/models/__init__.py
 from .base_transformer import TransformerTranslation
-# from .re_transformer import ReTransformerTranslation
+from .re_transformer import ReTransformerTranslation
 
 def build_model(config, vocab_size, pad_idx):
     model_type = config['model_type'] # 'base' hoặc 're'
     
-    # Các tham số chung
+    # Các tham số chung từ config.yaml
     kwargs = {
         'src_vocab_size': vocab_size,
         'tgt_vocab_size': vocab_size,
@@ -21,9 +21,7 @@ def build_model(config, vocab_size, pad_idx):
     if model_type == 'base':
         return TransformerTranslation(**kwargs)
     elif model_type == 're':
-        # Nếu ReTransformer có thêm tham số riêng, thêm vào đây
-        # kwargs['extra_param'] = config['extra']
-        # return ReTransformerTranslation(**kwargs)
-        pass
+        # ReTransformer sử dụng cùng bộ tham số nhưng kiến trúc encoder khác
+        return ReTransformerTranslation(**kwargs)
     else:
         raise ValueError(f"Unknown model type: {model_type}")
