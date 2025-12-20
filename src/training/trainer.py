@@ -59,7 +59,7 @@ class Trainer:
 
             with torch.amp.autocast(device_type='cuda', dtype=self.mixed_precision_dtype, enabled=self.use_amp):
                 # forward() của cả 2 wrapper phải trả về logit dự đoán
-                output = self.model(src, tgt_input)
+                output = self.model.module(src, tgt_input)
                 loss = self.criterion(output.reshape(-1, output.shape[-1]), tgt_output.reshape(-1))
             
             if self.use_amp and self.mixed_precision_dtype == torch.float16:
@@ -146,7 +146,7 @@ class Trainer:
                 tgt_input, tgt_output = tgt[:, :-1], tgt[:, 1:]
                 
                 with torch.amp.autocast(device_type='cuda', dtype=self.mixed_precision_dtype, enabled=self.use_amp):
-                    output = self.model(src, tgt_input)
+                    output = self.model.module(src, tgt_input)
                     loss = self.criterion(output.reshape(-1, output.shape[-1]), tgt_output.reshape(-1))
                 total_loss += loss.item()
 
