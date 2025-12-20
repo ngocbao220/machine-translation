@@ -25,10 +25,11 @@ def main():
     # 2. Setup Data (Tái sử dụng logic từ train.py)
     # Tokenizer sẽ được load lại từ folder đã train thay vì train mới
     dm = BPEDataManager(
-        data_dir=os.path.join("./data/raw", config['data']['dataset_name']), 
+        data_dir=os.path.join("./data/processed", config['data']['dataset_name']), 
         src_lang=config['data']['src_lang'],
         tgt_lang=config['data']['tgt_lang'],
-        vocab_size=config['data']['vocab_size']
+        vocab_size=config['data']['vocab_size'],
+        data_type="test"  # Chỉ load dữ liệu test
     )
     
     real_vocab = dm.tokenizer.get_vocab_size()
@@ -40,9 +41,15 @@ def main():
     config['model']['model_type'] = config['model'].get('model_type', 'base')
 
     # Lấy tập Validation (hoặc Test nếu bạn đã tách riêng) để đánh giá
-    _, val_ds = dm.get_datasets(val_ratio=0.1)
-    val_loader = DataLoader(val_ds, batch_size=config['train']['batch_size'], 
-                            shuffle=False, collate_fn=dm._collate_fn)
+    _, test_ds = dm.get_datasets(val_ratio=0.0)
+    test_loader = DataLoader(
+        test_ds,
+        batch_size=config['train']['batch_size'],
+        pin_memory=True,
+        num_workers=4,
+        persistent_workers=True,
+        collate_fn=dm._collate_fn
+    )
 
     # 3. Build Model & Load Weights
     model = build_model(
@@ -72,18 +79,18 @@ def main():
     )
 
     # 5. Đánh giá định lượng (BLEU Score)
-    print(f"\n📊 Calculating BLEU score on {len(val_ds)} samples...")
+    print(f"\n📊 Calculating BLEU score on {len(test_ds)} samples...")
     # Tăng max_samples nếu bạn muốn đo trên toàn bộ bộ test
-    final_bleu = trainer.compute_bleu_sacrebleu(val_loader, max_samples=1000)
+    final_bleu = trainer.compute_bleu_sacrebleu(test_loader, max_samples=1000)
     print(f"🔥 FINAL TEST BLEU: {final_bleu:.2f}")
 
     # 6. Đánh giá định tính (Dịch thử mẫu thực tế)
     print(f"\n📝 Qualitative Analysis (Top {args.num_samples} samples):")
     print("-" * 60)
-    
-    for i in range(min(args.num_samples, len(val_ds))):
-        src_ids, tgt_ids = val_ds[i]
-        
+
+    for i in range(min(args.num_samples, len(test_ds))):
+        src_ids, tgt_ids = test_ds[i]
+
         # Chuyển src_ids sang tensor
         src_tensor = torch.LongTensor(src_ids).to(device)
         

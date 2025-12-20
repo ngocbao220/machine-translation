@@ -27,7 +27,7 @@ def main():
     # Giả sử trong class BPEDataManager bạn đã sửa để nhận dataset_name
     # data_root/raw/{dataset_name}
     dm = BPEDataManager(
-        data_dir=os.path.join("./data/raw", config['data']['dataset_name']), 
+        data_dir=os.path.join("./data/processed", config['data']['dataset_name']), 
         src_lang=config['data']['src_lang'],
         tgt_lang=config['data']['tgt_lang'],
         vocab_size=config['data']['vocab_size']

@@ -30,7 +30,7 @@ train:
   warmup_pct: 0.15        # 15% tổng số steps dành cho warmup (OneCycleLR)
   gpu_mode: true
   use_amp: true           # Sử dụng Mixed Precision để tăng tốc trên GPU
-  save_dir: "./outputs/checkpoints/re_alt_zh_vi"
+  save_dir: "outputs/checkpoints/re_alt_zh_vi"
   grad_clip: 1.0
   use_wandb: true
 

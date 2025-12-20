@@ -188,3 +188,7 @@ class Trainer:
             'val_loss': val_loss
         }
         torch.save(state, os.path.join(save_dir, f"checkpoint_{epoch}.pth"))
+
+        if is_best:
+            torch.save(state, os.path.join(save_dir, "best_model.pth"))
+            print(f"💾 Saved Best Model at epoch {epoch} with val_loss: {val_loss:.4f}")

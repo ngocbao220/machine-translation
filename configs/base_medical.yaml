@@ -18,7 +18,7 @@ train:
   epochs: 30
   gpu_mode: true
   use_amp: true      # Mixed Precision
-  save_dir: ".outputs/checkpoints/base_medical_zh_vi"
+  save_dir: "outputs/checkpoints/base_medical_zh_vi"
   use_wandb: true
 
 logging:

@@ -8,7 +8,7 @@ class BPEDataManager:
     """
     Quản lý dữ liệu Dịch máy sử dụng BPE Tokenizer.
     """
-    def __init__(self, data_dir, src_lang, tgt_lang, vocab_size=30000, model_prefix="bpe_model"):
+    def __init__(self, data_dir, src_lang, tgt_lang, vocab_size=30000, model_prefix="bpe_model", data_type="train"):
         self.data_dir = data_dir
         self.src_lang = src_lang
         self.tgt_lang = tgt_lang
@@ -16,8 +16,8 @@ class BPEDataManager:
         self.tokenizer_path = os.path.join(data_dir, f"{model_prefix}_{vocab_size}.json")
         
         # 1. Tìm file dữ liệu
-        self.src_file = self._find_file(src_lang)
-        self.tgt_file = self._find_file(tgt_lang)
+        self.src_file = self._find_file(src_lang, data_type)
+        self.tgt_file = self._find_file(tgt_lang, data_type)
         
         print(f"✅ Found Source: {self.src_file}")
         print(f"✅ Found Target: {self.tgt_file}")
@@ -39,16 +39,21 @@ class BPEDataManager:
         self.bos_id = self.tokenizer.token_to_id("<bos>")
         self.eos_id = self.tokenizer.token_to_id("<eos>")
 
-    def _find_file(self, lang):
+    def _find_file(self, lang, data_type):
         """Tìm file linh hoạt: hỗ trợ các định dạng tên file phổ biến"""
         # Ưu tiên các định dạng tên file thường gặp
-        candidates = [
-            f"data_{lang}.txt",     # ALT format
-            f"train.{lang}.txt",    # IWSLT format
-            f"{lang}.txt",          # Simple format
-            f"train.{lang}",        # Raw format
-            f"test.{lang}.txt"      # Test files
-        ]
+        if data_type == "train":
+            candidates = [
+                f"data_{lang}.txt",     # ALT format
+                f"train.{lang}.txt",    # IWSLT format
+                f"{lang}.txt",          # Simple format
+                f"train.{lang}",        # Raw format
+            ]
+        elif data_type == "test":   
+            candidates = [
+                f"tst2012.{lang}.txt",      # IWSLT test format
+                f"test.{lang}.txt"      # Test files
+            ]
         
         for fname in candidates:
             path = os.path.join(self.data_dir, fname)
