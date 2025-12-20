@@ -1,27 +1,40 @@
+# --- CẤU HÌNH DỮ LIỆU ---
 data:
-  dataset_name: "Medical"
-  src_lang: "en"
+  dataset_name: "ALT"
+  src_lang: "zh"
   tgt_lang: "vi"
-  vocab_size: 10000
+  vocab_size: 8000        # Với 20k câu, vocab 8k-10k là tối ưu để tránh ma trận embedding bị loãng
+  max_seq_len: 128
+  tokenizer_path: "./data/processed/alt_zh_vi/tokenizer.model"
+  test_src: "./data/raw/ALT/test.zh"
+  test_tgt: "./data/raw/ALT/test.vi"
+  pad_idx: 0
+  bos_idx: 1
+  eos_idx: 2
 
+# --- CẤU HÌNH MÔ HÌNH (Re-Transformer Small) ---
 model:
-  model_type: "base"       # Đổi thành "re" để dùng ReTransformer
-  d_model: 512
+  model_type: "re"        # Kích hoạt logic ReEncoderLayer [s-s-f]
+  d_model: 256            # Giảm từ 512 -> 256 để phù hợp với 20k câu
   nhead: 8
-  num_layers: 6
-  dim_feedforward: 2048
-  dropout: 0.2
+  num_layers: 6           # 6 lớp tương ứng với 2 chu kỳ [s-s-f, s-s-f]
+  dim_feedforward: 1024   # Giảm từ 2048 -> 1024
+  dropout: 0.3            # Tăng dropout lên 0.3 để chống overfitting trên data ít
 
+# --- CẤU HÌNH HUẤN LUYỆN ---
 train:
-  batch_size: 64
-  lr: 0.0005
-  epochs: 30
+  batch_size: 64          # Batch size nhỏ giúp cập nhật trọng số nhiều lần hơn mỗi epoch
+  lr: 0.0005              # max_lr cho OneCycleLR
+  epochs: 50              # Tăng lên 50 epoch vì mô hình nhỏ cần nhiều vòng lặp hơn để hội tụ
+  label_smoothing: 0.1    # Cực kỳ quan trọng để tăng điểm BLEU
+  warmup_pct: 0.15        # 15% tổng số steps dành cho warmup (OneCycleLR)
   gpu_mode: true
-  use_amp: true      # Mixed Precision
-  save_dir: ".outputs/checkpoints/base_medical_zh_vi"
-  use_wandb: true
+  use_amp: true           # Sử dụng Mixed Precision để tăng tốc trên GPU
+  save_dir: "./outputs/checkpoints/re_alt_zh_vi"
+  grad_clip: 1.0
 
+# --- LOGGING ---
 logging:
   use_wandb: true
-  project_name: "base_medical_zh_vi"
+  project_name: "re_transformer_alt_zh_vi"
   wandb_api_key: "4379f72f74531ca44486a34cb4e859dc0e3cf103"

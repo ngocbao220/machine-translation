@@ -1,0 +1,1 @@
+python eval.py --config configs/base_config.yaml --checkpoint outputs/checkpoints/best_model.pth --num_samples 10

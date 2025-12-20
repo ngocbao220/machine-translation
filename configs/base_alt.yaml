@@ -1,7 +1,7 @@
 data:
   dataset_name: "ALT"
-  src_lang: "vi"
-  tgt_lang: "zh"
+  src_lang: "zh"
+  tgt_lang: "vi"
   vocab_size: 10000
 
 model:
