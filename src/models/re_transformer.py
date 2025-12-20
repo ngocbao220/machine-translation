@@ -177,7 +177,7 @@ class Decoder(nn.Module):
         return self.norm(x)
     
 class ReTransformerTranslation(nn.Module):
-    def __init__(self, src_vocab_size, tgt_vocab_size, d_model, pad_idx=0, num_encoder_layers=6, num_decoder_layers=2, nhead=8, dropout=0.1):
+    def __init__(self, src_vocab_size, tgt_vocab_size, d_model, pad_idx=0, num_encoder_layers=6, num_decoder_layers=2, nhead=8, dropout=0.1, dim_feedforward=1024):
         super().__init__()
         self.pad_idx = pad_idx
         self.encoder = ReEncoder(src_vocab_size, d_model, num_encoder_layers, nhead, dropout)
