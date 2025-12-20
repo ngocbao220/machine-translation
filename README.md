@@ -35,6 +35,36 @@ Lưu ý: kiểm tra file BPE / vocab tương ứng trong mỗi bộ dữ liệu 
 Ví dụ huấn luyện cơ bản sử dụng file config `configs/base_iwslt25.yaml`:
 
 ```bash
+data:
+  dataset_name: "ALT"
+  src_lang: "en"
+  tgt_lang: "vi"
+  vocab_size: 10000
+
+model:
+  model_type: "base"       # Đổi thành "re" để dùng ReTransformer
+  d_model: 512
+  nhead: 4
+  num_layers: 4
+  dim_feedforward: 1024
+  dropout: 0.2
+
+train:
+  batch_size: 64
+  lr: 0.0005
+  epochs: 30
+  gpu_mode: true
+  use_amp: true      # Mixed Precision
+  save_dir: "outputs/checkpoints/base_alt_en_vi"
+  use_wandb: true
+
+logging:
+  use_wandb: true
+  project_name: "base_alt_en_vi"
+  wandb_api_key: "my_key"
+```
+
+```bash
 python train.py --config configs/base_iwslt25.yaml
 ```
 
@@ -45,6 +75,7 @@ bash scripts/run_train_base.sh
 ```
 
 Một số lưu ý:
+
 - Checkpoint sẽ được lưu vào `outputs/checkpoints/` (hoặc thư mục được chỉ định trong config).
 - Các tham số huấn luyện (batch size, lr, epochs, v.v.) được điều khiển trong file YAML trong `configs/`.
 
@@ -53,18 +84,13 @@ Một số lưu ý:
 Sau khi có checkpoint, chạy `eval.py` để dịch và tính số liệu (ví dụ BLEU). Ví dụ:
 
 ```bash
-python eval.py --config configs/base_iwslt25.yaml --checkpoint outputs/checkpoints/checkpoint_last.pt
+python eval.py --config configs/base_iwslt25.yaml --checkpoint outputs/checkpoints/base_alt_en_vi/best_model.pt
 ```
-
 
 ## Kết quả thu được
 
-- Dataset: IWSLT15
-- BLEU (sacrebleu):  XX.X
-
-- Dataset: ALT
-- BLEU (sacrebleu):  XX.X
-
-- Dataset: Medical
-- BLEU (sacrebleu):  XX.X
-
+| Dataset        | Size    | BLEU Score |
+| :------------- | :------ | :--------- |
+| **IWSLT15**    | 133,000 | **28.22**  |
+| **ALT Corpus** | 20,000  | **14.68**  |
+| **Medical**    | 500,000 | **35.67**  |

@@ -1,38 +1,38 @@
-
+# --- CẤU HÌNH DỮ LIỆU ---
 data:
-  dataset_name: "ALT"
+  dataset_name: "IWSLT15"
   src_lang: "en"
   tgt_lang: "vi"
-  vocab_size: 8000      
-  max_seq_len: 2000
+  vocab_size: 15000      
+  max_seq_len: 3000
   pad_idx: 0
   bos_idx: 1
   eos_idx: 2
 
-
+# --- CẤU HÌNH MÔ HÌNH (Re-Transformer Small) ---
 model:
   model_type: "re"        
-  d_model: 256          
+  d_model: 512       
   nhead: 8
   num_layers: 6          
-  dim_feedforward: 1024  
-  dropout: 0.3          
+  dim_feedforward: 2048
+  dropout: 0.1   
 
-
+# --- CẤU HÌNH HUẤN LUYỆN ---
 train:
-  batch_size: 64          
+  batch_size: 256   
   lr: 0.0005              
   epochs: 50              
   label_smoothing: 0.1    
   warmup_pct: 0.15        
   gpu_mode: true
   use_amp: true        
-  save_dir: "outputs/checkpoints/re_alt_en_vi"
+  save_dir: "outputs/checkpoints/re_iwslt25_en_vi"
   grad_clip: 1.0
   use_wandb: true
 
 # --- LOGGING ---
 logging:
   use_wandb: true
-  project_name: "re_transformer_alt_en_vi"
+  project_name: "re_transformer_iwslt25_en_vi"
   wandb_api_key: "my_key"
