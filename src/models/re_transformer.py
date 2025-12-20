@@ -49,7 +49,7 @@ class PositionalEncoder(nn.Module):
         seq_length = x.size(1)
         pe = Variable(self.pe[:, :seq_length], requires_grad=False)
         if x.is_cuda: pe.cuda()
-        x = x + pe
+        x = x + self.pe[:, :x.size(1), :] 
         return self.dropout(x)
 
 class MultiHeadAttention(nn.Module):
