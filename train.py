@@ -62,13 +62,6 @@ def main():
         vocab_size=real_vocab, 
         pad_idx=dm.pad_id
     )
-
-    # Compile Model (RTX 4090)
-    try:
-        print("🔥 Compiling model with torch.compile...")
-        model = torch.compile(model)
-    except Exception as e:
-        print(f"Warning: Could not compile model. Error: {e}")
     
     # 4. Setup Device & Optimizer
     use_cuda = config['train']['gpu_mode'] and torch.cuda.is_available()
