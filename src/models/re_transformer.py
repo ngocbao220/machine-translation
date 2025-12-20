@@ -31,7 +31,7 @@ class Embedder(nn.Module):
         return self.embed(x)
 
 class PositionalEncoder(nn.Module):
-    def __init__(self, d_model, max_seq_length=200, dropout=0.1):
+    def __init__(self, d_model, max_seq_length=2000, dropout=0.1):
         super().__init__()
         self.d_model = d_model
         self.dropout = nn.Dropout(dropout)
