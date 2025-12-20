@@ -68,12 +68,6 @@ logging:
 python train.py --config configs/base_iwslt25.yaml
 ```
 
-Hoặc dùng script helper (nếu có):
-
-```bash
-bash scripts/run_train_base.sh
-```
-
 Một số lưu ý:
 
 - Checkpoint sẽ được lưu vào `outputs/checkpoints/` (hoặc thư mục được chỉ định trong config).
